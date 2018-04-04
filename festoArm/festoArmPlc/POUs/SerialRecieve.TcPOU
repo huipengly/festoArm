@@ -1,0 +1,86 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4022.7">
+  <POU Name="SerialRecieve" Id="{e323f4c6-8cf7-44c0-8000-0e96e3f83b49}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM SerialRecieve
+VAR
+	//读取编码器角度
+	EL6_22Bin_PC1	AT %I* 	: KL6inData22b;
+	EL6_22Bout_PC1	AT %Q*	: KL6outData22b;
+	RxBuffer1: COMBuffer;
+	TxBuffer1: COMBuffer;
+	JIAODU	AT %Q* : LREAL;(*单位 度*)
+	JIAOSUDU: LREAL;(*单位 度*)
+	JIAOJIASUDU: LREAL;(*单位 度*)
+	SerialLineControlElbow:SerialLineControl;
+	
+	i:INT;
+    AA:BYTE;
+	BB:BYTE;
+	RxBufferStep:INT:=0;
+    AA_P:BYTE;
+	BB_P:BYTE;
+	JIAODU_INT:INT;
+	J1: LREAL:=0;
+	J2: LREAL:=0;
+	J3: LREAL:=0;
+	W1: LREAL:=0;
+	W2: LREAL:=0;
+	t_tip: LREAL:=0.01;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[//读取编码器的数值
+SerialLineControlElbow(
+	Mode:= SERIALLINEMODE_KL6_22B_STANDARD, 
+	pComIn:= ADR(EL6_22Bin_PC1), 
+	pComOut:= ADR(EL6_22Bout_PC1), 
+	SizeComIn:= UINT_TO_INT(SIZEOF(EL6_22Bin_PC1)), 
+	TxBuffer:= TxBuffer1, 
+	RxBuffer:= RxBuffer1);
+
+IF RxBuffer1.Count<> 0 THEN
+	FOR i:=1 TO UINT_TO_INT(RxBuffer1.Count) DO
+		IF RxBufferStep=3 THEN
+			BB:=RxBuffer1.Buffer[RxBuffer1.RdIdx];
+			AA:=AA_P;
+			RxBufferStep:=0;
+		END_IF
+		IF RxBufferStep=2 THEN
+			AA_P:=RxBuffer1.Buffer[RxBuffer1.RdIdx];
+			RxBufferStep:=3;
+		END_IF
+		IF RxBufferStep=1 THEN
+			IF RxBuffer1.Buffer[RxBuffer1.RdIdx]=90 THEN
+				RxBufferStep:=2;
+			ELSE
+				RxBufferStep:=0;
+			END_IF
+		END_IF
+		IF RxBuffer1.Buffer[RxBuffer1.RdIdx]=165 THEN
+			RxBufferStep:=1;
+		END_IF
+
+		RxBuffer1.RdIdx:=RxBuffer1.RdIdx+1;
+		IF RxBuffer1.RdIdx>300 THEN
+			RxBuffer1.RdIdx:=0;
+		END_IF
+	END_FOR
+RxBuffer1.Count:=0;
+END_IF
+
+JIAODU_INT:=UINT_TO_INT(AA*256+BB);
+JIAODU:=INT_TO_REAL(JIAODU_INT)*360.0/4096.0;
+J3:=J2;
+J2:=J1;
+J1:=JIAODU;
+JIAOSUDU:=(J1-J2)/t_tip;
+W2:=W1;
+W1:=JIAOSUDU;
+JIAOJIASUDU:=(W1-W2)/t_tip;
+]]></ST>
+    </Implementation>
+    <LineIds Name="SerialRecieve">
+      <LineId Id="3" Count="47" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

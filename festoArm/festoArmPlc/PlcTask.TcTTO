@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4022.7">
+  <Task Name="PlcTask" Id="{555e1823-7393-4603-9567-2dc3691fdbd7}">
+    <!--CycleTime in micro seconds.-->
+    <CycleTime>10000</CycleTime>
+    <Priority>20</Priority>
+    <PouCall>
+      <Name>MAIN</Name>
+    </PouCall>
+    <PouCall>
+      <Name>SerialRecieve</Name>
+    </PouCall>
+    <TaskFBGuid>{7dbfd09d-6fca-486e-a9ed-c09dcf66eb55}</TaskFBGuid>
+    <Fb_init>{bd18b47b-1d01-45c5-b1b5-76f57f9d1583}</Fb_init>
+    <Fb_exit>{a36ba34a-9d52-4d7a-a528-34d2e0d87d0e}</Fb_exit>
+    <CycleUpdate>{b8f4d50b-c053-481c-bb0b-cbd9859c14dd}</CycleUpdate>
+    <PostCycleUpdate>{3ac8fa79-bd26-432e-9b4d-23780560f9d3}</PostCycleUpdate>
+  </Task>
+</TcPlcObject>

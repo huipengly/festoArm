@@ -1,0 +1,230 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4022.7">
+  <POU Name="MAIN" Id="{d3213d7e-c3f2-49f7-9023-c08e3d3da609}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM MAIN
+VAR
+	elbow1, elbow2 AT%Q* : INT;
+	BILI1, BILI2: LREAL;
+	wrist AT%Q* : INT;
+	wrist_real : LREAL;
+	
+	//肩关节水平移动自由度变量
+	AxisLevelShift: AXIS_REF;											//运动轴
+	MC_PowerLevelShift: MC_Power;										//电源模块
+	MC_MoveAbsoluteLevelShift: MC_MoveAbsolute;							//绝对运动模块
+	
+	//肩关节旋转移动自由度变量
+	AxisRotate: AXIS_REF;												//运动轴
+	MC_PowerRotate: MC_Power;											//电源模块
+	MC_MoveAbsoluteRotate: MC_MoveAbsolute;								//绝对运动模块
+	
+	//肩关节初始化完成标志量
+	ShoulderInitStart AT%I* : BOOL := TRUE;							//肩关节初始化启动
+	ShoulderInitFinish AT%Q*: BOOL := FALSE;
+	
+	//PLC时间
+	Timer AT%Q*: LREAL := 0;											//时间 
+	InitStatusLevelShift: INT;
+	ErrorTime: LREAL;
+	InitFinishLevelShift: BOOL;
+	ErrorCode: INT;
+	InitStatusRotate: INT;
+	InitFinishRotate: BOOL;
+	MC_MoveAbsolute1: INT;
+	startTimer: LREAL;
+	sTime: LREAL;
+	holdTime: LREAL;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[MC_PowerLevelShift(
+	Axis:= AxisLevelShift,
+	Enable_Positive:= TRUE,
+	Enable_Negative:= TRUE, );
+	
+MC_MoveAbsoluteLevelShift(
+	Axis:= AxisLevelShift, );
+	
+MC_PowerRotate(
+	Axis:= AxisRotate,
+	Enable_Positive:= TRUE,
+	Enable_Negative:= TRUE, );
+	
+MC_MoveAbsoluteRotate(
+	Axis:= AxisRotate, );
+		
+IF ShoulderInitFinish = FALSE THEN
+	//肩关节初始化
+	
+	//平移自由度
+	
+	CASE InitStatusLevelShift OF
+		0://等待初始化命令
+			IF ShoulderInitStart THEN
+				InitStatusLevelShift := 1;
+			END_IF
+		1://init 初始化
+			MC_PowerLevelShift.Enable := FALSE;
+			MC_MoveAbsoluteLevelShift.Execute := FALSE;
+			InitStatusLevelShift := 2;
+		2://power 使能
+			MC_PowerLevelShift.Enable := TRUE;
+			IF MC_PowerLevelShift.Status THEN
+				InitStatusLevelShift := 3;
+			END_IF
+			IF AxisLevelShift.Status.Error THEN
+				//ErrorTime := Timer;
+				InitStatusLevelShift := 5;
+			END_IF
+		3://move 移动到初始位置
+			MC_MoveAbsoluteLevelShift.Position := 0;
+			MC_MoveAbsoluteLevelShift.Velocity := 3;
+			MC_MoveAbsoluteLevelShift.Execute := TRUE;
+			IF MC_MoveAbsoluteLevelShift.Done THEN
+				MC_MoveAbsoluteLevelShift.Execute := FALSE;
+				InitStatusLevelShift := 4;
+			END_IF
+		4://finishInit 初始化完成
+			InitFinishLevelShift := TRUE;
+		5://error
+			ErrorCode := 1000;
+	END_CASE
+	
+	
+	//旋转自由度
+	
+	CASE InitStatusRotate OF
+		0://等待初始化命令
+			IF ShoulderInitStart THEN
+				InitStatusRotate := 1;
+			END_IF
+		1://init 初始化
+			MC_PowerRotate.Enable := FALSE;
+			MC_MoveAbsoluteRotate.Execute := FALSE;
+			InitStatusRotate := 2;
+		2://power 使能
+			MC_PowerRotate.Enable := TRUE;
+			IF MC_PowerRotate.Status THEN
+				InitStatusRotate := 3;
+			END_IF
+			IF AxisLevelShift.Status.Error THEN
+				//ErrorTime := Timer;
+				InitStatusRotate := 5;
+			END_IF
+		3://move 移动到初始位置
+			MC_MoveAbsoluteRotate.Position := 0;
+			MC_MoveAbsoluteRotate.Velocity := 3;
+			MC_MoveAbsoluteRotate.Execute := TRUE;
+			IF MC_MoveAbsoluteRotate.Done THEN
+				MC_MoveAbsoluteRotate.Execute := FALSE;
+				InitStatusRotate := 4;
+			END_IF
+		4://finishInit 初始化完成
+			InitFinishRotate := TRUE;
+		5://error
+			ErrorCode := 1100;
+	END_CASE
+			
+	IF InitFinishLevelShift AND InitFinishRotate THEN
+		ShoulderInitFinish := TRUE;
+	END_IF
+END_IF
+
+IF ShoulderInitFinish = TRUE THEN
+	Timer := Timer + 0.01;
+	
+	IF Timer < 10 THEN	//电机移动
+		MC_MoveAbsoluteLevelShift.Position := 25;
+		MC_MoveAbsoluteLevelShift.Velocity := 4;
+		MC_MoveAbsoluteLevelShift.Execute := TRUE;
+	END_IF
+	
+	IF Timer > 10 AND Timer < 20 THEN //初始化
+		BILI1 := (Timer - 10) / 10.0 * 2.7;
+		BILI2 := 0;
+	END_IF
+	
+	IF Timer > 20 AND Timer < 30 THEN //肘关节动
+		BILI1 := 2.5;
+		BILI2 := (Timer - 20) / 10.0 * 3.0;
+	END_IF
+	
+	IF Timer > 30 AND Timer < 40 THEN //腕关节动
+		wrist_real := (Timer - 30) / 10.0 * 6.0;
+	END_IF
+	
+	IF Timer > 50 AND Timer < 60 THEN //肘关节放气
+		//BILI1 := (60 - Timer) / 10.0 * 2.7;
+		BILI2 := (60 - Timer) / 10.0 * 3.0;
+	END_IF
+	
+	IF Timer > 60 AND Timer < 70 THEN //腕关节放气
+		wrist_real := (70 - Timer) / 10.0 * 6.0;
+	END_IF
+	
+	(*IF Timer > 70 AND Timer < 80 THEN //腕关节放气
+		MC_MoveAbsoluteLevelShift.Execute := FALSE;
+		MC_MoveAbsoluteLevelShift.Position := 0;
+		MC_MoveAbsoluteLevelShift.Velocity := 4;
+		MC_MoveAbsoluteLevelShift.Execute := TRUE;
+	END_IF*)
+END_IF
+
+//输出
+IF BILI1 < 46 AND BILI2 < 6 THEN
+	elbow1 := LREAL_TO_INT(BILI1 / 10.0 * 10000);
+	elbow2 := LREAL_TO_INT(BILI2 / 10.0 * 10000);
+END_IF
+IF wrist_real < 7 THEN
+	wrist := LREAL_TO_INT(wrist_real / 10.0 * 10000);
+END_IF]]></ST>
+    </Implementation>
+    <LineIds Name="MAIN">
+      <LineId Id="146" Count="5" />
+      <LineId Id="133" Count="0" />
+      <LineId Id="153" Count="0" />
+      <LineId Id="155" Count="5" />
+      <LineId Id="154" Count="0" />
+      <LineId Id="152" Count="0" />
+      <LineId Id="132" Count="0" />
+      <LineId Id="39" Count="1" />
+      <LineId Id="48" Count="35" />
+      <LineId Id="91" Count="34" />
+      <LineId Id="38" Count="0" />
+      <LineId Id="134" Count="0" />
+      <LineId Id="136" Count="0" />
+      <LineId Id="135" Count="0" />
+      <LineId Id="140" Count="1" />
+      <LineId Id="196" Count="0" />
+      <LineId Id="175" Count="1" />
+      <LineId Id="174" Count="0" />
+      <LineId Id="197" Count="0" />
+      <LineId Id="268" Count="0" />
+      <LineId Id="194" Count="0" />
+      <LineId Id="202" Count="0" />
+      <LineId Id="198" Count="1" />
+      <LineId Id="203" Count="0" />
+      <LineId Id="247" Count="0" />
+      <LineId Id="207" Count="1" />
+      <LineId Id="248" Count="0" />
+      <LineId Id="252" Count="0" />
+      <LineId Id="249" Count="0" />
+      <LineId Id="251" Count="0" />
+      <LineId Id="204" Count="0" />
+      <LineId Id="286" Count="4" />
+      <LineId Id="294" Count="0" />
+      <LineId Id="291" Count="1" />
+      <LineId Id="265" Count="0" />
+      <LineId Id="295" Count="0" />
+      <LineId Id="297" Count="0" />
+      <LineId Id="304" Count="0" />
+      <LineId Id="299" Count="1" />
+      <LineId Id="298" Count="0" />
+      <LineId Id="296" Count="0" />
+      <LineId Id="266" Count="0" />
+      <LineId Id="285" Count="0" />
+      <LineId Id="277" Count="6" />
+      <LineId Id="276" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>
