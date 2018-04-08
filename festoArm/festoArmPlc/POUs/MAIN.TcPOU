@@ -140,6 +140,7 @@ IF ShoulderInitFinish = TRUE THEN
 	END_IF
 	
 	IF Timer > 10 AND Timer < 20 THEN //初始化
+		MC_MoveAbsoluteLevelShift.Execute := FALSE;
 		BILI1 := (Timer - 10) / 10.0 * 2.7;
 		BILI2 := 0;
 	END_IF
@@ -162,12 +163,11 @@ IF ShoulderInitFinish = TRUE THEN
 		wrist_real := (70 - Timer) / 10.0 * 6.0;
 	END_IF
 	
-	(*IF Timer > 70 AND Timer < 80 THEN //腕关节放气
-		MC_MoveAbsoluteLevelShift.Execute := FALSE;
+	IF Timer > 70 AND Timer < 80 THEN //肩关节恢复
 		MC_MoveAbsoluteLevelShift.Position := 0;
 		MC_MoveAbsoluteLevelShift.Velocity := 4;
 		MC_MoveAbsoluteLevelShift.Execute := TRUE;
-	END_IF*)
+	END_IF
 END_IF
 
 //输出
@@ -201,6 +201,7 @@ END_IF]]></ST>
       <LineId Id="197" Count="0" />
       <LineId Id="268" Count="0" />
       <LineId Id="194" Count="0" />
+      <LineId Id="346" Count="0" />
       <LineId Id="202" Count="0" />
       <LineId Id="198" Count="1" />
       <LineId Id="203" Count="0" />
@@ -215,11 +216,10 @@ END_IF]]></ST>
       <LineId Id="294" Count="0" />
       <LineId Id="291" Count="1" />
       <LineId Id="265" Count="0" />
-      <LineId Id="295" Count="0" />
+      <LineId Id="339" Count="0" />
       <LineId Id="297" Count="0" />
-      <LineId Id="304" Count="0" />
       <LineId Id="299" Count="1" />
-      <LineId Id="298" Count="0" />
+      <LineId Id="345" Count="0" />
       <LineId Id="296" Count="0" />
       <LineId Id="266" Count="0" />
       <LineId Id="285" Count="0" />

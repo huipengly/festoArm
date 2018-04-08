@@ -1873,13 +1873,6 @@ External Setpoint Generation:
 					<Vars VarGrpType="1">
 						<Name>PlcTask Inputs</Name>
 						<Var>
-							<Name>SerialRecieve.EL6_22Bin_PC1</Name>
-							<Comment>
-								<![CDATA[读取编码器角度]]>
-							</Comment>
-							<Type GUID="{85F752A6-5894-4F70-AC78-6F51CACEC3A6}" Namespace="Tc2_SerialCom">KL6inData22B</Type>
-						</Var>
-						<Var>
 							<Name>MAIN.ShoulderInitStart</Name>
 							<Comment>
 								<![CDATA[肩关节初始化启动]]>
@@ -1984,6 +1977,13 @@ External Setpoint Generation:
 								</Comment>
 							</SubVar>
 						</Var>
+						<Var>
+							<Name>SerialRecieve.EL6_22Bin_PC1</Name>
+							<Comment>
+								<![CDATA[读取编码器角度]]>
+							</Comment>
+							<Type GUID="{85F752A6-5894-4F70-AC78-6F51CACEC3A6}" Namespace="Tc2_SerialCom">KL6inData22B</Type>
+						</Var>
 					</Vars>
 					<Vars VarGrpType="2">
 						<Name>PlcTask Outputs</Name>
@@ -2000,15 +2000,8 @@ External Setpoint Generation:
 							<Type>INT</Type>
 						</Var>
 						<Var>
-							<Name>SerialRecieve.EL6_22Bout_PC1</Name>
-							<Type GUID="{9AB25BB7-CCFE-49E2-AC91-51402C5F47A9}" Namespace="Tc2_SerialCom">KL6outData22B</Type>
-						</Var>
-						<Var>
-							<Name>SerialRecieve.JIAODU</Name>
-							<Comment>
-								<![CDATA[单位 度]]>
-							</Comment>
-							<Type>LREAL</Type>
+							<Name>MAIN.ShoulderInitFinish</Name>
+							<Type>BOOL</Type>
 						</Var>
 						<Var>
 							<Name>MAIN.AxisLevelShift.PlcToNc</Name>
@@ -2019,13 +2012,20 @@ External Setpoint Generation:
 							<Type GUID="{63A84524-72E3-41C8-BEAB-4CCE44690A13}" Namespace="MC">PLCTONC_AXIS_REF</Type>
 						</Var>
 						<Var>
-							<Name>MAIN.ShoulderInitFinish</Name>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
 							<Name>MAIN.Timer</Name>
 							<Comment>
 								<![CDATA[时间 ]]>
+							</Comment>
+							<Type>LREAL</Type>
+						</Var>
+						<Var>
+							<Name>SerialRecieve.EL6_22Bout_PC1</Name>
+							<Type GUID="{9AB25BB7-CCFE-49E2-AC91-51402C5F47A9}" Namespace="Tc2_SerialCom">KL6outData22B</Type>
+						</Var>
+						<Var>
+							<Name>SerialRecieve.JIAODU</Name>
+							<Comment>
+								<![CDATA[单位 度]]>
 							</Comment>
 							<Type>LREAL</Type>
 						</Var>
