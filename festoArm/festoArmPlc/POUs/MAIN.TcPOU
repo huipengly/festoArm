@@ -133,37 +133,32 @@ END_IF
 IF ShoulderInitFinish = TRUE THEN
 	Timer := Timer + 0.01;
 	
-	IF Timer < 10 THEN	//电机移动
+	IF Timer < 10 THEN	//气动初始化
+		MC_MoveAbsoluteLevelShift.Execute := FALSE;
+		BILI1 := Timer / 10.0 * 2.7;
+		BILI2 := 0;
+	END_IF
+	
+	IF Timer > 10 AND Timer < 20 THEN	//电机移动
 		MC_MoveAbsoluteLevelShift.Position := 25;
 		MC_MoveAbsoluteLevelShift.Velocity := 4;
 		MC_MoveAbsoluteLevelShift.Execute := TRUE;
 	END_IF
 	
-	IF Timer > 10 AND Timer < 20 THEN //初始化
-		MC_MoveAbsoluteLevelShift.Execute := FALSE;
-		BILI1 := (Timer - 10) / 10.0 * 2.7;
-		BILI2 := 0;
-	END_IF
-	
 	IF Timer > 20 AND Timer < 30 THEN //肘关节动
+		MC_MoveAbsoluteLevelShift.Execute := FALSE;
 		BILI1 := 2.5;
 		BILI2 := (Timer - 20) / 10.0 * 3.0;
+		wrist_real := (Timer - 20) / 10.0 * 6.0;
 	END_IF
 	
-	IF Timer > 30 AND Timer < 40 THEN //腕关节动
-		wrist_real := (Timer - 30) / 10.0 * 6.0;
-	END_IF
-	
-	IF Timer > 50 AND Timer < 60 THEN //肘关节放气
+	IF Timer > 35 AND Timer < 45 THEN //肘关节放气
 		//BILI1 := (60 - Timer) / 10.0 * 2.7;
-		BILI2 := (60 - Timer) / 10.0 * 3.0;
+		BILI2 := (45 - Timer) / 10.0 * 3.0;
+		wrist_real := (45 - Timer) / 10.0 * 6.0;
 	END_IF
 	
-	IF Timer > 60 AND Timer < 70 THEN //腕关节放气
-		wrist_real := (70 - Timer) / 10.0 * 6.0;
-	END_IF
-	
-	IF Timer > 70 AND Timer < 80 THEN //肩关节恢复
+	IF Timer > 45 AND Timer < 55 THEN //肩关节恢复
 		MC_MoveAbsoluteLevelShift.Position := 0;
 		MC_MoveAbsoluteLevelShift.Velocity := 4;
 		MC_MoveAbsoluteLevelShift.Execute := TRUE;
@@ -194,26 +189,24 @@ END_IF]]></ST>
       <LineId Id="134" Count="0" />
       <LineId Id="136" Count="0" />
       <LineId Id="135" Count="0" />
-      <LineId Id="140" Count="1" />
+      <LineId Id="140" Count="0" />
+      <LineId Id="348" Count="0" />
+      <LineId Id="355" Count="0" />
+      <LineId Id="350" Count="2" />
+      <LineId Id="141" Count="0" />
+      <LineId Id="354" Count="0" />
       <LineId Id="196" Count="0" />
       <LineId Id="175" Count="1" />
       <LineId Id="174" Count="0" />
-      <LineId Id="197" Count="0" />
-      <LineId Id="268" Count="0" />
-      <LineId Id="194" Count="0" />
-      <LineId Id="346" Count="0" />
-      <LineId Id="202" Count="0" />
-      <LineId Id="198" Count="1" />
+      <LineId Id="199" Count="0" />
       <LineId Id="203" Count="0" />
       <LineId Id="247" Count="0" />
-      <LineId Id="207" Count="1" />
-      <LineId Id="248" Count="0" />
-      <LineId Id="252" Count="0" />
+      <LineId Id="356" Count="0" />
+      <LineId Id="207" Count="0" />
       <LineId Id="249" Count="0" />
       <LineId Id="251" Count="0" />
       <LineId Id="204" Count="0" />
-      <LineId Id="286" Count="4" />
-      <LineId Id="294" Count="0" />
+      <LineId Id="286" Count="2" />
       <LineId Id="291" Count="1" />
       <LineId Id="265" Count="0" />
       <LineId Id="339" Count="0" />
